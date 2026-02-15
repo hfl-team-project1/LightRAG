@@ -2790,6 +2790,23 @@ async def extract_entities(
     entity_types = global_config["addon_params"].get(
         "entity_types", DEFAULT_ENTITY_TYPES
     )
+    # [CENARIO] Support optional relation_types constraint via addon_params.
+    # When relation_types are provided, the prompt instructs the LLM to use
+    # canonical type labels instead of free-form keywords.
+    relation_types = global_config["addon_params"].get("relation_types", [])
+    if relation_types:
+        relation_type_instruction = (
+            "Use one of the following canonical relationship types: "
+            f"[{', '.join(relation_types)}]. "
+            "If none of the provided types apply, use the closest match or `related_to`."
+        )
+        relation_types_section = "[" + ", ".join(relation_types) + "]"
+    else:
+        relation_type_instruction = (
+            "One or more high-level keywords summarizing the overarching "
+            "nature, concepts, or themes of the relationship."
+        )
+        relation_types_section = "(not constrained)"
 
     examples = "\n".join(PROMPTS["entity_extraction_examples"])
 
@@ -2797,6 +2814,8 @@ async def extract_entities(
         tuple_delimiter=PROMPTS["DEFAULT_TUPLE_DELIMITER"],
         completion_delimiter=PROMPTS["DEFAULT_COMPLETION_DELIMITER"],
         entity_types=", ".join(entity_types),
+        relation_type_instruction=relation_type_instruction,
+        relation_types_section=relation_types_section,
         language=language,
     )
     # add example's format
@@ -2806,6 +2825,8 @@ async def extract_entities(
         tuple_delimiter=PROMPTS["DEFAULT_TUPLE_DELIMITER"],
         completion_delimiter=PROMPTS["DEFAULT_COMPLETION_DELIMITER"],
         entity_types=",".join(entity_types),
+        relation_type_instruction=relation_type_instruction,
+        relation_types_section=relation_types_section,
         examples=examples,
         language=language,
     )
