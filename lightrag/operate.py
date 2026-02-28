@@ -2796,9 +2796,9 @@ async def extract_entities(
     relation_types = global_config["addon_params"].get("relation_types", [])
     if relation_types:
         relation_type_instruction = (
-            "Use one of the following canonical relationship types: "
+            "Use ONLY one of the following relationship types: "
             f"[{', '.join(relation_types)}]. "
-            "If none of the provided types apply, use the closest match or `related_to`."
+            "Do not invent new types. If no type fits, skip the relationship."
         )
         relation_types_section = "[" + ", ".join(relation_types) + "]"
     else:
