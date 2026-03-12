@@ -2798,7 +2798,7 @@ async def extract_entities(
         relation_type_instruction = (
             "Use ONLY one of the following relationship types: "
             f"[{', '.join(relation_types)}]. "
-            "Do not invent new types. If no type fits, skip the relationship."
+            "Do not invent new types. Use your judgement to decide whether to skip unclear relationships."
         )
         relation_types_section = "[" + ", ".join(relation_types) + "]"
     else:

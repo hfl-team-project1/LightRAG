@@ -675,6 +675,11 @@ def priority_limit_async_func_call(
         active_futures = weakref.WeakSet()
         reinit_count = 0
 
+        # Progress tracking
+        completed_count = 0
+        total_enqueued = 0
+        progress_lock = asyncio.Lock()
+
         async def worker():
             """Enhanced worker that processes tasks with proper timeout and state management"""
             try:
@@ -753,6 +758,17 @@ def priority_limit_async_func_call(
                             if not task_state.future.done():
                                 task_state.future.set_exception(e)
                         finally:
+                            # Track and log progress
+                            nonlocal completed_count
+                            async with progress_lock:
+                                completed_count += 1
+                                done = completed_count
+                                total = total_enqueued
+                                pending = queue.qsize()
+                            elapsed = asyncio.get_event_loop().time() - task_state.execution_start_time
+                            logger.info(
+                                f"{queue_name}: completed {done}/{total} ({pending} queued, {elapsed:.1f}s)"
+                            )
                             # Clean up task state
                             async with task_states_lock:
                                 task_states.pop(task_id, None)
@@ -878,6 +894,10 @@ def priority_limit_async_func_call(
                 worker_health_check_task = asyncio.create_task(enhanced_health_check())
 
                 initialized = True
+                # Reset progress counters for new run
+                nonlocal completed_count, total_enqueued
+                completed_count = 0
+                total_enqueued = 0
                 # Log dynamic timeout configuration
                 timeout_info = []
                 if llm_timeout is not None:
@@ -980,10 +1000,12 @@ def priority_limit_async_func_call(
                 active_futures.add(future)
 
                 # Get counter for FIFO ordering
-                nonlocal counter
+                nonlocal counter, total_enqueued
                 async with initialization_lock:
                     current_count = counter
                     counter += 1
+                async with progress_lock:
+                    total_enqueued += 1
 
                 # Queue the task with timeout handling
                 try:
