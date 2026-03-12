@@ -85,7 +85,7 @@ Extract entities and relationships from the input text in Data to be Processed b
 """
 
 PROMPTS["entity_continue_extraction_user_prompt"] = """---Task---
-Based on the last extraction task, identify and extract any **missed or incorrectly formatted** entities and relationships from the input text.
+Based on the last extraction task, identify and extract any **missed or incorrectly formatted** entities and relationships from the input text below.
 
 ---Instructions---
 1.  **Strict Adherence to System Format:** Strictly adhere to all format requirements for entity and relationship lists, including output order, field delimiters, and proper noun handling, as specified in the system instructions.
@@ -98,6 +98,18 @@ Based on the last extraction task, identify and extract any **missed or incorrec
 5.  **Output Content Only:** Output *only* the extracted list of entities and relationships. Do not include any introductory or concluding remarks, explanations, or additional text before or after the list.
 6.  **Completion Signal:** Output `{completion_delimiter}` as the final line after all relevant missing or corrected entities and relationships have been extracted and presented.
 7.  **Output Language:** Ensure the output language is {language}. Proper nouns (e.g., personal names, place names, organization names) must be kept in their original language and not translated.
+
+---Data to be Processed---
+<Entity_types>
+[{entity_types}]
+
+<Relation_types>
+{relation_types_section}
+
+<Input Text>
+```
+{input_text}
+```
 
 <Output>
 """
