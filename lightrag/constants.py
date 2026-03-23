@@ -95,8 +95,10 @@ DEFAULT_EMBEDDING_BATCH_NUM = 10  # Default batch size for embedding computation
 DEFAULT_TIMEOUT = 300
 
 # Default llm and embedding timeout
-DEFAULT_LLM_TIMEOUT = 180
-DEFAULT_EMBEDDING_TIMEOUT = 30
+# 600s base → ~1200s worker timeout, enough for slow local inference (ARM emulation, etc.)
+# Override with LLM_TIMEOUT env var for faster providers
+DEFAULT_LLM_TIMEOUT = 600
+DEFAULT_EMBEDDING_TIMEOUT = 120
 
 # Logging configuration defaults
 DEFAULT_LOG_MAX_BYTES = 10485760  # Default 10MB
